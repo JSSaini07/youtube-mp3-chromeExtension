@@ -1,17 +1,30 @@
 
-try{
-  document.getElementById("youtube-url").value=window.location.search.substr(5,window.location.search.length);
-  window.location="javascript:btnSubmitClick()";
-  var link=null;
-  var getURL=setInterval(function(){
-  if(link!=null){clearInterval(getURL);window.location=link;setTimeout(function(){window.close();},1000)}
-    download_div=document.getElementById("dl_link");
-    for(i=0;i<download_div.childElementCount;i++) {
-      if(download_div.children[i].href.indexOf("s_create")>=0) {
-        link=download_div.children[i].href;
-        break;
-      }
+download_link=undefined;
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if(request.message=='download'){
+    url=request.url;
+    document.getElementById("youtube-url").value=url;
+    $('#submit').click();
+    interval=setInterval(function(){checkforlink()},100);
+  }
+});
+
+function checkforlink(){
+  links=document.getElementById("dl_link");
+  for(i=0;i<links.childElementCount;i++){
+    if(links.children[i]!=undefined&&!links.children[i].href.includes('r=-1.1'))
+    {
+      download_link=links.children[i].href;
     }
-  },1000);
+  }
+  if(download_link!=undefined){
+    clearInterval(interval);
+    startDownload(download_link);
+  }
 }
-catch(e){window.close();alert("Couldn't Download This Video!");}
+
+function startDownload(link){
+  window.close();
+  chrome.runtime.sendMessage({'message':'download','link':link});
+}

@@ -1,6 +1,26 @@
 
+opened_tab_id="";
+url="";
+
 chrome.browserAction.onClicked.addListener(function(tab) {
-  chrome.tabs.executeScript({
-    code: 'if(window.location.hostname=="www.youtube.com"&&window.location.pathname=="/watch"&&window.location.search!=""){url=window.location.hostname+window.location.pathname+window.location.search;window.open("http://www.youtube-mp3.org/?url="+url)}'
-  });
+  if(tab.url.includes('https://www.youtube.com/watch?v='))
+  {
+    url=tab.url;
+    chrome.tabs.create({'url':'http://www.youtube-mp3.org/',active:false},function(tab){
+      opened_tab_id=tab.id;
+    });
+  }
+});
+
+chrome.tabs.onUpdated.addListener(function(tabid,info,tab){
+  if(info.status=='complete'&&opened_tab_id==tabid){
+    chrome.tabs.sendMessage(opened_tab_id,{'message':'download','url':url});
+  }
+});
+
+chrome.extension.onMessage.addListener(function(message, tabinfo) {
+  console.log(message);
+    if (message.message == 'download') {
+        chrome.tabs.create({'url': message.link,active:false});
+    };
 });

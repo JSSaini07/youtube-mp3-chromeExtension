@@ -12,7 +12,7 @@
   "content_scripts": [
     {
       "matches": ["http://www.youtube-mp3.org/*"],
-      "js": ["content.js"]
+      "js": ["content.js","jquery.min.js"]
     }
   ],
   "browser_action": {
